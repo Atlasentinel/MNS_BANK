@@ -1,9 +1,9 @@
 export abstract class Account {
 
     protected balance : number = 15000000;
-    protected numeroCompte : String
+    protected numeroCompte : string
 
-    public debit(montant:number):String {
+    public debit(montant:number):string {
         this.balance = this.balance - montant;
         return "Montant de" + montant + "débiter";
     }
@@ -12,7 +12,7 @@ export abstract class Account {
         this.balance = this.balance + montant;
     }
 
-    public getBalance() : String {
+    public getBalance() : string {
         return "Le montant de votre compte est de :" + this.balance;
     }
 
