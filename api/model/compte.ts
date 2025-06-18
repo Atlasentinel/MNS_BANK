@@ -12,7 +12,7 @@ export abstract class Compte {
         this.sold = this.sold + montant;
     }
 
-    public toString() : String {
+    public getSold() : String {
         return "Le montant de votre compte est de :" + this.sold;
     }
 
