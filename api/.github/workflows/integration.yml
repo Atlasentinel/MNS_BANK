@@ -22,11 +22,8 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - name: Install dependencies
-      working-directory: MNS-BANK/api
       run: npm ci
     - name: Build
-      working-directory: MNS-BANK/api
       run: npm run build --if-present
     - name: Run tests
-      working-directory: MNS-BANK/api
       run: npm test
