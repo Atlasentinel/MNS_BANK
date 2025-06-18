@@ -1,19 +1,31 @@
+import { Client } from "./Client";
+
+
 export abstract class Account {
-
+    protected client : Client;
     protected balance : number = 15000000;
-    protected numeroCompte : string
+    protected numberAccount : String
 
-    public debit(montant:number):string {
-        this.balance = this.balance - montant;
-        return "Montant de" + montant + "débiter";
+    public getClient() : Client {
+        return this.client
     }
 
-    public credit(montant: number):void {
-        this.balance = this.balance + montant;
+    public Account(client : Client) : void {
+        this.setClient(client);
     }
 
-    public getBalance() : string {
-        return "Le montant de votre compte est de :" + this.balance;
+    public getBalance() : number {
+        return this.balance;
     }
+
+    public setClient(client : Client) : void{
+        this.client = client;
+    }
+
+    public setBalance(balance : number) : void {
+        this.balance = balance;
+    }
+
+
 
 }
