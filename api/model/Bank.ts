@@ -62,4 +62,4 @@ class Bank {
     }
 }
 
-export { Banks, Accounts };
+export { Bank, Account };
