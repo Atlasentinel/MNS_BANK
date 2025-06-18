@@ -1,4 +1,4 @@
-import { Compte } from "./compte";
+import { Compte } from "./compte.ts";
 
 export class CompteAvecDecouvert extends Compte {
 
