@@ -1,5 +1,5 @@
 class Client {
-    numeroClient: number;
-    adresse: string;
-    nom: string;
+    numberClient: number;
+    adress: string;
+    name: string;
 }
