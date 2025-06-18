@@ -1,6 +1,6 @@
 export abstract class Compte {
 
-    protected sold : number = 1000;
+    protected sold : number = 15000000;
     protected numeroCompte : String
 
     public debiter(montant:number):String {
@@ -8,9 +8,12 @@ export abstract class Compte {
         return "Montant de" + montant + "débiter";
     }
 
-    public  crediter(montant: number):void {
+    public crediter(montant: number):void {
         this.sold = this.sold + montant;
     }
 
+    public toString() : String {
+        return "Le montant de votre compte est de :" + this.sold;
+    }
 
 }
