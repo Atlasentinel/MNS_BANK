@@ -1,9 +1,9 @@
 const express = require('express');
 const app = express();
 const port = 3000;
-const clientsRoutes = require('./routes/clientsRoutes');
-const banksRoutes = require('./routes/banksRoutes');
-const accountsRoutes = require('./routes/accountsRoutes');
+const clientsRoutes = require('./controller/ClientController');
+const banksRoutes = require('./controller/BankController');
+const accountsRoutes = require('./controller/AccountController');
 
 app.use(express.json());
 
