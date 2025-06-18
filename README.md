@@ -7,3 +7,11 @@
 - Boukada Adel : développeur
 
 ## Classes
+- Banque
+- Client:
+    - numeroClient:String
+    - adresse:string
+    - nom:string
+- Compte:
+    - solde:float
+    - numeroCompte:string
