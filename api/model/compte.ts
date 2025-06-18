@@ -1,0 +1,16 @@
+export abstract class Compte {
+
+    protected sold : number = 1000;
+    protected numeroCompte : String
+
+    public debiter(montant:number):String {
+        this.sold = this.sold - montant;
+        return "Montant de" + montant + "débiter";
+    }
+
+    public  crediter(montant: number):void {
+        this.sold = this.sold + montant;
+    }
+
+
+}
