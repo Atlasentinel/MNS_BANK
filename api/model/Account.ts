@@ -6,6 +6,10 @@ export abstract class Account {
     protected balance : number = 15000000;
     protected numberAccount : String
 
+    public getClient() : Client {
+        return this.client
+    }
+
     public Account(client : Client) : void {
         this.setClient(client);
     }
