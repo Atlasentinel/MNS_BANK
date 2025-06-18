@@ -1,11 +1,11 @@
-type Account = {
+type Accounts = {
     accountNumber: string;
     clientName: string;
     balance: number;
 };
 
-class Bank {
-    private readonly accounts: Account[] = [];
+class Banks {
+    private readonly accounts: Accounts[] = [];
 
     // Méthode pour ouvrir un compte
     openAccount(accountNumber: string, clientName: string, initialDeposit: number = 0) {
@@ -62,4 +62,4 @@ class Bank {
     }
 }
 
-export { Bank, Account };
+export { Banks, Accounts };
