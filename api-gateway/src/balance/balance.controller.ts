@@ -5,7 +5,7 @@ import { BalanceService } from './balance.service';
 export class BalanceController {
   constructor(private readonly balanceService: BalanceService) {}
 
-  @Get(':userId:token')
+  @Get(':userId/:token')
   getBalance(@Param('userId' ) userId: string, @Param('token') token: string) {
     return this.balanceService.getBalance(userId, token);
   }

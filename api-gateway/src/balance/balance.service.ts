@@ -11,7 +11,7 @@ export class BalanceService {
     return this.httpService
       .get(`http://localhost:3000/client/${userId}/balance/${token}`)
       .pipe(
-        map(response => response.status)
+        map(response => response.data)
       );
   }
 }
