@@ -1,0 +1,29 @@
+-- Script d'initialisation pour la base de données PostgreSQL
+-- À exécuter dans psql en tant que superutilisateur (ex: postgres)
+CREATE DATABASE mns_bank;
+CREATE USER mns_user WITH ENCRYPTED PASSWORD 'mns_password';
+GRANT ALL PRIVILEGES ON DATABASE mns_bank TO mns_user;
+
+-- Connecte-toi à la base nouvellement créée
+\c mns_bank
+
+-- Extension pour UUID si besoin
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Table transaction 
+CREATE TABLE IF NOT EXISTS transactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    account_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    amount DOUBLE PRECISION NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT (now() AT TIME ZONE 'utc')
+);
+
+-- Insertion de données de test
+INSERT INTO transactions (account_id, type, amount, description)
+VALUES
+  ('account123', 'credit', 1000, 'Premier dépôt'),
+  ('account123', 'debit', 200, 'Achat courses'),
+  ('account456', 'credit', 500, 'Virement reçu'),
+  ('account789', 'debit', 50, 'Paiement mobile');
