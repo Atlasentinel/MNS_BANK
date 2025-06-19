@@ -12,7 +12,6 @@ export class AuthController {
 
   @Post('checktoken')
   checkToken(@Body() token: { token: string }) {
-    return true
     return this.authService.checkToken(token);
   }
 }
