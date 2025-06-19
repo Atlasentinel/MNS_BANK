@@ -1,3 +1,8 @@
-.history
-.env
-*node_modules
+*node_modules/
+*dist/
+*logs/
+*.npm/
+*.eslintcache
+*.repl_history
+*.env
+*.env.test
