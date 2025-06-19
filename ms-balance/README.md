@@ -1,4 +1,4 @@
-# Projet de création d'une banque MNS
+# MICROSERVICE Balance
 
 ## Participants :
 - Ziadi Noé : Chef de projet
@@ -18,7 +18,7 @@ npm i
 
 
 ### Configuration
-Encore aucun configuration n'est nécessaire
+Encore aucune configuration n'est nécessaire
 
 
 ### Dépendances
@@ -31,7 +31,7 @@ Encore aucun configuration n'est nécessaire
 
 *Démarrer l'api*
 ```bash
-node app.js
+npm run dev
 ```
 
 ### Routes Utilisables
