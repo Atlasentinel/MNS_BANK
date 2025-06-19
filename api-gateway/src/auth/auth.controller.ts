@@ -5,8 +5,13 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  authenticate(@Body() userCredentials: { username: string; password: string }) {
+  @Post('login')
+  authenticate(@Body() userCredentials: { login: string; password: string }) {
     return this.authService.authenticate(userCredentials);
+  }
+
+  @Post('checktoken')
+  checkToken(@Body() token: { token: string }) {
+    return this.authService.checkToken(token);
   }
 }

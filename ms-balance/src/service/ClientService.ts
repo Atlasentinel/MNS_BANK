@@ -18,18 +18,18 @@ export default class ClientService {
         return this.data.clients;
     }
 
-    public getAmmountByClient(id: number): number {
+    public getAmmountByClient(id: number): any {
         const client = this.getClientById(id);
         if (client && client.Account && typeof client.Account.balance === 'number') {
             return client.Account.balance;
         }
-        throw new Error("Client or account not found");
+        throw new Error("Account not found or balance is not a number");
     }
 
     public getClientById(id: number): any {
         const client = this.data.clients.find((c: any) => c.id === id);
         if (!client) {
-            throw new Error("Client not found");
+            throw new Error(`Client with id ${id} not found`);
         }
         return client;
     }
