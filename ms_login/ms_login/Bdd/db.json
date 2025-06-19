@@ -1,0 +1,29 @@
+{
+  "users": [
+    {
+      "login": "user1@mail.com",
+      "password": "pass1",
+      "token": "token1"
+    },
+    {
+      "login": "user2@mail.com",
+      "password": "pass2",
+      "token": "token2"
+    },
+    {
+      "login": "user3@mail.com",
+      "password": "pass3",
+      "token": "token3"
+    },
+    {
+      "login": "user4@mail.com",
+      "password": "pass4",
+      "token": "token4"
+    },
+    {
+      "login": "user5@mail.com",
+      "password": "pass5",
+      "token": "token5"
+    }
+  ]
+}
