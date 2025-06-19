@@ -22,3 +22,24 @@ npm i
 ```bash
 npm run start
 ```
+
+
+### Routes Utilisables
+
+#### **POST /auth/login**
+##### Entrée:
+##### - login
+##### - mot de passe
+##### Sortie:
+##### - Un token
+
+#### **POST /auth/checktoken**
+##### Entrée:
+##### - token
+##### Sortie:
+##### - Booléen true or false
+
+
+#### **GET /balance/{clientID}**
+##### Sortie:
+##### - Nombre floattant
