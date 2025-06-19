@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "jhCtgfwjFQGy4GNPlDASQtfXuAMmC8JzW7ZT2X1b+Zw=",
+  "Source": "ms_login",
+  "BasePath": "_content/ms_login",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
