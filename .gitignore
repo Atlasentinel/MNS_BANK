@@ -1,0 +1,8 @@
+*node_modules/
+*dist/
+*logs/
+*.npm/
+*.eslintcache
+*.repl_history
+*.env
+*.env.test
