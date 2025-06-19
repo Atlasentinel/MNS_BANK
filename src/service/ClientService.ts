@@ -26,4 +26,32 @@ export default class ClientService {
         }
         return client;
     }
+
+    public getAccountByClientId(id: number): any {
+        const client = this.getClientById(id);
+        if (!client.Account) {
+            throw new Error("Account not found");
+        }
+        return client.Account;
+    }
+
+    public getRichestClient(): any {
+        if (!this.data.clients || this.data.clients.length === 0) {
+            throw new Error("No clients available");
+        }
+
+        let richest = this.data.clients[0];
+
+        for (const client of this.data.clients) {
+            if (
+                client.Account &&
+                richest.Account &&
+                client.Account.balance > richest.Account.balance
+            ) {
+                richest = client;
+            }
+        }
+
+        return richest;
+    }
 }
