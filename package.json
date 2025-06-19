@@ -1,0 +1,39 @@
+{
+  "name": "mns_bank",
+  "version": "1.0.0",
+  "description": "- Ziadi Noé : Chef de projet\r - Keovilay Loan : architecte logiciel\r - Mignon Valentin : Testeur\r - Boukada Adel : développeur",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node dist/index.js",
+    "dev": "nodemon",
+    "watch": "nodemon"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Atlasentinel/MNS_BANK.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Atlasentinel/MNS_BANK/issues"
+  },
+  "homepage": "https://github.com/Atlasentinel/MNS_BANK#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.3",
+    "@types/supertest": "^6.0.3",
+    "jest": "^30.0.0",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.1.1",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
