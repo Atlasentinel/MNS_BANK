@@ -12,10 +12,21 @@ export default class ClientController {
     }
 
     private registerRoutes(): void {
+        this.getAllClient = this.getAllClient.bind(this);
+        this.router.get('/clients', this.getAllClient);
         this.router.get('/client/:id/balance', this.getClientBalance.bind(this));
         this.router.get('/client/:id', this.getClientById.bind(this));
         this.router.get('/client/:id/account', this.getClientAccount.bind(this));
         this.router.get('/client-richest', this.getRichestClient.bind(this));
+    }
+
+    private getAllClient(req: Request, res: Response): void {
+        try {
+            const clients = this.clientService.getAllClients();
+            res.status(200).json(clients);
+        } catch (err: any) {
+            res.status(500).json({ error: err.message });
+        }
     }
 
     private getClientBalance(req: Request, res: Response): void {

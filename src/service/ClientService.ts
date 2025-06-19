@@ -11,6 +11,13 @@ export default class ClientService {
         this.data = JSON.parse(rawData);
     }
 
+    public getAllClients(): any[] {
+        if (!this.data.clients || this.data.clients.length === 0) {
+            throw new Error("No clients available");
+        }
+        return this.data.clients;
+    }
+
     public getAmmountByClient(id: number): number {
         const client = this.getClientById(id);
         if (client && client.Account && typeof client.Account.balance === 'number') {
