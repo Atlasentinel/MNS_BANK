@@ -1,5 +1,7 @@
 import { Router, Request, Response } from 'express';
+import axios from 'axios';
 import ClientService from '../service/ClientService';
+
 
 export default class ClientController {
     public router: Router;
@@ -14,7 +16,7 @@ export default class ClientController {
     private registerRoutes(): void {
         this.getAllClient = this.getAllClient.bind(this);
         this.router.get('/clients', this.getAllClient);
-        this.router.get('/client/:id/balance', this.getClientBalance.bind(this));
+        this.router.get('/client/:id/balance/:token', this.getClientBalance.bind(this));
         this.router.get('/client/:id', this.getClientById.bind(this));
         this.router.get('/client/:id/account', this.getClientAccount.bind(this));
         this.router.get('/client-richest', this.getRichestClient.bind(this));
@@ -29,15 +31,39 @@ export default class ClientController {
         }
     }
 
-    private getClientBalance(req: Request, res: Response): void {
+
+    // private getClientBalance(req: Request, res: Response): void {
+    //     try {
+    //         const id = parseInt(req.params.id);
+    //         const balance = this.clientService.getAmmountByClient(id);
+    //         res.status(200).json({ balance });
+    //     } catch (err: any) {
+    //         res.status(404).json({ error: err.message });
+    //     }
+    // }
+
+    public async getClientBalance(req: Request, res: Response): Promise<void> {
         try {
-            const id = parseInt(req.params.id);
-            const balance = this.clientService.getAmmountByClient(id);
-            res.status(200).json({ balance });
-        } catch (err: any) {
-            res.status(404).json({ error: err.message });
+
+        const body = {
+            token : req.params.token,
         }
-    }
+
+        const gatewayCheck = await axios.post('http://localhost:3100/auth/checktoken', body);
+
+        if (!gatewayCheck.data || gatewayCheck.data !== true) {
+            res.status(503).json({ error: 'Le client est pas connecté' });
+            return;
+        }
+
+        const id = parseInt(req.params.id);
+        const balance = this.clientService.getAmmountByClient(id);
+        res.status(200).json({ balance });
+
+        } catch (err: any) {
+            res.status(404).json({ error: err.message || 'Erreur inconnue' });
+        }
+  }
 
     private getClientById(req: Request, res: Response): void {
         try {
