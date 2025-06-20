@@ -44,7 +44,7 @@ namespace ms_login.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to load users: {ex.Message}");
+                throw new Exception($"Failed to load users: {ex.Message}");
             }
         }
 
@@ -121,9 +121,7 @@ namespace ms_login.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error saving JSON: {ex.Message}");
-                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
-
+                throw new Exception($"❌ Error saving JSON: {ex.Message}" + $" Stack Trace: {ex.StackTrace}");
             }
         }
     }

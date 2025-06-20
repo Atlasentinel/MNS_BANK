@@ -32,16 +32,6 @@ export default class ClientController {
     }
 
 
-    // private getClientBalance(req: Request, res: Response): void {
-    //     try {
-    //         const id = parseInt(req.params.id);
-    //         const balance = this.clientService.getAmmountByClient(id);
-    //         res.status(200).json({ balance });
-    //     } catch (err: any) {
-    //         res.status(404).json({ error: err.message });
-    //     }
-    // }
-
     public async getClientBalance(req: Request, res: Response): Promise<void> {
         try {
 
@@ -49,7 +39,7 @@ export default class ClientController {
             token : req.params.token,
         }
 
-        const gatewayCheck = await axios.post('http://localhost:3100/auth/checktoken', body);
+        const gatewayCheck = await axios.post('http://api-gateway:3100/auth/checktoken', body);
 
         if (!gatewayCheck.data || gatewayCheck.data !== true) {
             res.status(503).json({ error: 'Le client est pas connecté' });

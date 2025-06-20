@@ -10,4 +10,6 @@ FROM debian:bookworm-slim
 WORKDIR /app
 COPY --from=builder /app/ms-transaction .
 EXPOSE 8000
-CMD ["./ms-transaction"]
+COPY wait-for-postgres.sh /wait-for-postgres.sh
+RUN chmod +x /wait-for-postgres.sh
+CMD ["/wait-for-postgres.sh", "./ms-transaction"]
