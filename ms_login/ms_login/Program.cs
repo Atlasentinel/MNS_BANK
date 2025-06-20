@@ -1,4 +1,4 @@
-//Initialisation du builder pour créer la webApp
+//Initialisation du builder pour crï¿½er la webApp
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -14,9 +14,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//Instantiation de l'app et démarrage de la webApp
+//Instantiation de l'app et dï¿½marrage de la webApp
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.MapControllers();
 
-app.Run();
+app.Run("http://0.0.0.0:3001");

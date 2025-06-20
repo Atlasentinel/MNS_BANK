@@ -11,6 +11,14 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+  gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "3100:3100"
+    depends_on:
+      - ms-login
+      - ms-balance
 
   ms-transaction:
     build: ./ms-transaction
@@ -23,7 +31,13 @@ services:
     depends_on:
       - postgres
       - ms-balance
-
+  ms-login:
+    build: ./ms_login/ms_login
+    container_name: ms-login
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
   ms-balance:
     build: ./ms-balance
     container_name: ms-balance
