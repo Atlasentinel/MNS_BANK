@@ -10,70 +10,40 @@ namespace ms_login.Services
 {
     public class AuthService
     {
-        private List<User> _users;
-        private string _jsonPath;
+        private readonly List<User> _users;
+        private readonly string _jsonPath;
 
         public AuthService()
         {
-            _jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Bdd", "db.json");
-            _jsonPath = Path.GetFullPath(_jsonPath);
-            Console.WriteLine($"Loading users from: {_jsonPath}");
+            _jsonPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Bdd", "db.json"));
+            Console.WriteLine($"📁 Chargement des utilisateurs depuis : {_jsonPath}");
 
-            _users = new List<User>();
-            try
-            {
-                if (!File.Exists(_jsonPath))
-                {
-                    Console.WriteLine("File not found. Creating a new one.");
-                    SaveUsersToJson(); // Créer le fichier s'il n'existe pas
-                    return;
-                }
-
-                var json = File.ReadAllText(_jsonPath);
-                var data = JsonSerializer.Deserialize<UsersData>(json);
-
-                if (data?.Users != null)
-                {
-                    _users = data.Users;
-                    Console.WriteLine($"Loaded {_users.Count} users.");
-                }
-                else
-                {
-                    Console.WriteLine("No users found.");
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Failed to load users: {ex.Message}");
-            }
+            _users = LoadUsersFromJson();
         }
 
         public string Authenticate(LoginRequest request)
         {
-            string hashedPassword = HashHelper.ComputeSha512Hash(request.Password);
-            Console.WriteLine(request.Password + " Mdp: " + " Hashed: " + hashedPassword);
+            var hashedPassword = HashHelper.ComputeSha512Hash(request.Password);
+            Console.WriteLine($"🔐 Tentative d'authentification : {request.Login} / Hash: {hashedPassword}");
 
             var user = _users.FirstOrDefault(u =>
                 u.Login.Trim().Equals(request.Login.Trim(), StringComparison.OrdinalIgnoreCase) &&
                 u.Password == hashedPassword);
 
-
             if (user == null)
             {
-                Console.WriteLine("Authentication failed.");
+                Console.WriteLine("❌ Authentification échouée.");
                 return null;
             }
 
-            // Génère un token s'il n'existe pas
             if (string.IsNullOrEmpty(user.Token))
             {
                 user.Token = Guid.NewGuid().ToString();
-                Console.WriteLine("Creating user token");
-                SaveUsersToJson(); // Sauvegarde les données utilisateurs
-
+                Console.WriteLine("🪪 Nouveau token généré.");
+                SaveUsersToJson(_users);
             }
 
-            Console.WriteLine($"Authentication successful: {user.Login}, token: {user.Token}");
+            Console.WriteLine($"✅ Authentification réussie pour : {user.Login}");
             return user.Token;
         }
 
@@ -81,47 +51,60 @@ namespace ms_login.Services
         {
             if (string.IsNullOrWhiteSpace(token))
             {
-                Console.WriteLine("❌ Token is null or empty.");
+                Console.WriteLine("❌ Token vide ou nul.");
                 return false;
             }
 
             var user = _users.FirstOrDefault(u => u.Token == token);
+            var isValid = user != null;
 
-            if (user != null)
-            {
-                Console.WriteLine($"✅ Token valid for user: {user.Login}");
-                return true;
-            }
+            Console.WriteLine(isValid
+                ? $"✅ Token valide pour : {user.Login}"
+                : "❌ Token invalide.");
 
-            Console.WriteLine("❌ Invalid token.");
-            return false;
+            return isValid;
         }
 
-        private void SaveUsersToJson()
+        private List<User> LoadUsersFromJson()
         {
             try
             {
-                Console.WriteLine($"File path: {_jsonPath}");
-
-                var directory = Path.GetDirectoryName(_jsonPath);
-                if (!Directory.Exists(directory))
+                if (!File.Exists(_jsonPath))
                 {
-                    Directory.CreateDirectory(directory);
-                    Console.WriteLine($"Directory created: {directory}");
+                    Console.WriteLine("⚠️ Fichier JSON introuvable. Création d'un nouveau.");
+                    SaveUsersToJson(new List<User>());
+                    return new List<User>();
                 }
 
-                var data = new UsersData { Users = _users };
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                string jsonString = JsonSerializer.Serialize(data, options);
+                var json = File.ReadAllText(_jsonPath);
+                var data = JsonSerializer.Deserialize<UsersData>(json);
+                var users = data?.Users ?? new List<User>();
 
-                Console.WriteLine($"Data to save: {jsonString}");
-
-                File.WriteAllText(_jsonPath, jsonString);
-                Console.WriteLine("✅ Token saved to file db.json!");
+                Console.WriteLine($"👥 Utilisateurs chargés : {users.Count}");
+                return users;
             }
             catch (Exception ex)
             {
-                throw new Exception($"❌ Error saving JSON: {ex.Message}" + $" Stack Trace: {ex.StackTrace}");
+                throw new Exception($"❌ Erreur lors du chargement des utilisateurs : {ex.Message}");
+            }
+        }
+
+        private void SaveUsersToJson(List<User> users)
+        {
+            try
+            {
+                var directory = Path.GetDirectoryName(_jsonPath);
+                if (!Directory.Exists(directory))
+                    Directory.CreateDirectory(directory);
+
+                var json = JsonSerializer.Serialize(new UsersData { Users = users }, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(_jsonPath, json);
+
+                Console.WriteLine("✅ Données utilisateurs sauvegardées avec succès.");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"❌ Erreur lors de la sauvegarde : {ex.Message}\n{ex.StackTrace}");
             }
         }
     }
