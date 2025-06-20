@@ -9,7 +9,7 @@ export class BalanceService {
 
   getBalance(userId: string, token: string) {
     return this.httpService
-      .get(`http://localhost:3000/client/${userId}/balance/${token}`)
+      .get(`http://ms-balance:3000/client/${userId}/balance/${token}`)
       .pipe(
         map(response => response.data)
       );
