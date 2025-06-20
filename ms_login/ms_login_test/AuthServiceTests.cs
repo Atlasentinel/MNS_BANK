@@ -16,7 +16,7 @@ namespace ms_login_test
         [TestInitialize]
         public void Setup()
         {
-            // Récupère le fichier dans le bon chemin d'accès
+            // Fichier JSON simulé pour les tests
             TestDbPath = Path.Combine(AppContext.BaseDirectory, "db.json");
 
             var testUsers = new UsersData
@@ -27,6 +27,12 @@ namespace ms_login_test
                     {
                         Login = "user1@mail.com",
                         Password = ms_login.Helper.HashHelper.ComputeSha512Hash("pass1"),
+                        Token = "token1"
+                    },
+                    new User
+                    {
+                        Login = "user2@mail.com",
+                        Password = ms_login.Helper.HashHelper.ComputeSha512Hash("pass2"),
                         Token = null
                     }
                 }
@@ -47,9 +53,9 @@ namespace ms_login_test
             };
 
             var result = service.Authenticate(request);
-            Console.WriteLine("Returned token: " + result);
 
             Assert.IsNotNull(result);
+            Assert.AreEqual("token1", result);
         }
 
         [TestMethod]
@@ -63,25 +69,26 @@ namespace ms_login_test
             };
 
             var result = service.Authenticate(request);
+
             Assert.IsNull(result);
         }
-    }
 
-    public class AuthServiceTestable : AuthService
-    {
-        public AuthServiceTestable(string path)
+        [TestMethod]
+        public void CheckToken_ValidToken_ReturnsTrue()
         {
-            var json = File.ReadAllText(path);
-            var data = JsonSerializer.Deserialize<UsersData>(json);
-            var users = data?.Users ?? new List<User>();
+            var service = new AuthServiceTestable(TestDbPath);
+            var isValid = service.CheckToken("token1");
 
-            typeof(AuthService)
-                .GetField("_users", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                ?.SetValue(this, users);
+            Assert.IsTrue(isValid);
+        }
 
-            typeof(AuthService)
-                .GetField("_jsonPath", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                ?.SetValue(this, Path.GetFullPath(path));
+        [TestMethod]
+        public void CheckToken_InvalidToken_ReturnsFalse()
+        {
+            var service = new AuthServiceTestable(TestDbPath);
+            var isValid = service.CheckToken("invalid-token");
+
+            Assert.IsFalse(isValid);
         }
     }
 }

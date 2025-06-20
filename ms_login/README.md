@@ -88,9 +88,20 @@ dotnet run
 Ensuite, tu peux accéder à l'API sur :
 
 ```bash
-
 http://localhost:<port>/api/auth/login
 ```
+
+## 🎨 Swagger
+
+### ⚙️ Lancer le swagger
+
+Il faut avoir démarrer le projet préalablement pour se rendre sur le swagger.
+
+```bash
+http://localhost:3001/swagger/index.html
+```
+
+
 ✅ À venir
 Middleware pour vérifier les tokens
 

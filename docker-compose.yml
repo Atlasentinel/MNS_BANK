@@ -1,0 +1,69 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: ms-bank-db
+    env_file:
+      - .env.db
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+  gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "3100:3100"
+    depends_on:
+      - ms-login
+      - ms-balance
+
+  ms-dao:
+    build: ./ms-dao
+    container_name: ms-dao
+    env_file:
+      - .env.db
+      - ./ms-dao/.env.db
+    ports:
+      - "3200:3200"
+    depends_on:
+      - postgres
+
+  # ms-transaction:
+  #   build: ./ms-transaction
+  #   container_name: ms-transaction
+  #   env_file:
+  #     - .env.db
+  #     - ./ms-transaction/.env
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     - postgres
+  #     - ms-balance
+  ms-login:
+    build: ./ms_login/ms_login
+    container_name: ms-login
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+  ms-balance:
+    build: ./ms-balance
+    container_name: ms-balance
+    env_file:
+      - .env.db
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
+
+volumes:
+  pgdata:

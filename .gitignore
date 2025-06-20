@@ -6,3 +6,4 @@
 *.repl_history
 *.env
 *.env.test
+*.env.db

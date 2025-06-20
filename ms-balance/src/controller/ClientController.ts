@@ -5,21 +5,19 @@ import ClientService from '../service/ClientService';
 
 export default class ClientController {
     public router: Router;
-    private clientService: ClientService;
+    private readonly clientService: ClientService;
 
     constructor() {
         this.router = Router();
         this.clientService = new ClientService();
         this.registerRoutes();
     }
-
+    // Register routes for the client controller
     private registerRoutes(): void {
         this.getAllClient = this.getAllClient.bind(this);
         this.router.get('/clients', this.getAllClient);
         this.router.get('/client/:id/balance/:token', this.getClientBalance.bind(this));
         this.router.get('/client/:id', this.getClientById.bind(this));
-        this.router.get('/client/:id/account', this.getClientAccount.bind(this));
-        this.router.get('/client-richest', this.getRichestClient.bind(this));
     }
 
     private getAllClient(req: Request, res: Response): void {
@@ -32,16 +30,6 @@ export default class ClientController {
     }
 
 
-    // private getClientBalance(req: Request, res: Response): void {
-    //     try {
-    //         const id = parseInt(req.params.id);
-    //         const balance = this.clientService.getAmmountByClient(id);
-    //         res.status(200).json({ balance });
-    //     } catch (err: any) {
-    //         res.status(404).json({ error: err.message });
-    //     }
-    // }
-
     public async getClientBalance(req: Request, res: Response): Promise<void> {
         try {
 
@@ -49,7 +37,7 @@ export default class ClientController {
             token : req.params.token,
         }
 
-        const gatewayCheck = await axios.post('http://localhost:3100/auth/checktoken', body);
+        const gatewayCheck = await axios.post('http://api-gateway:3100/auth/checktoken', body);
 
         if (!gatewayCheck.data || gatewayCheck.data !== true) {
             res.status(503).json({ error: 'Le client est pas connecté' });
@@ -61,7 +49,7 @@ export default class ClientController {
         res.status(200).json({ balance });
 
         } catch (err: any) {
-            res.status(404).json({ error: err.message || 'Erreur inconnue' });
+            res.status(404).json({ error: err.message ?? 'Erreur inconnue' });
         }
   }
 
@@ -75,22 +63,5 @@ export default class ClientController {
         }
     }
 
-    private getClientAccount(req: Request, res: Response): void {
-        try {
-            const id = parseInt(req.params.id);
-            const account = this.clientService.getAccountByClientId(id);
-            res.status(200).json(account);
-        } catch (err: any) {
-            res.status(404).json({ error: err.message });
-        }
-    }
 
-    private getRichestClient(req: Request, res: Response): void {
-        try {
-            const client = this.clientService.getRichestClient();
-            res.status(200).json(client);
-        } catch (err: any) {
-            res.status(500).json({ error: err.message });
-        }
-    }
 }

@@ -9,7 +9,7 @@ namespace ms_login.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly Services.AuthService _authService = new();
+        private readonly AuthService _authService = new();
         
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
