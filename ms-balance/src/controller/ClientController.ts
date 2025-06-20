@@ -18,8 +18,6 @@ export default class ClientController {
         this.router.get('/clients', this.getAllClient);
         this.router.get('/client/:id/balance/:token', this.getClientBalance.bind(this));
         this.router.get('/client/:id', this.getClientById.bind(this));
-        this.router.get('/client/:id/account', this.getClientAccount.bind(this));
-        this.router.get('/client-richest', this.getRichestClient.bind(this));
     }
 
     private getAllClient(req: Request, res: Response): void {
@@ -65,22 +63,5 @@ export default class ClientController {
         }
     }
 
-    private getClientAccount(req: Request, res: Response): void {
-        try {
-            const id = parseInt(req.params.id);
-            const account = this.clientService.getAccountByClientId(id);
-            res.status(200).json(account);
-        } catch (err: any) {
-            res.status(404).json({ error: err.message });
-        }
-    }
 
-    private getRichestClient(req: Request, res: Response): void {
-        try {
-            const client = this.clientService.getRichestClient();
-            res.status(200).json(client);
-        } catch (err: any) {
-            res.status(500).json({ error: err.message });
-        }
-    }
 }
