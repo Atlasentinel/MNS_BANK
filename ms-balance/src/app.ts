@@ -1,5 +1,5 @@
 import express from 'express';
-import ClientController from './controller/ClientController'; // adapte le chemin
+import ClientController from './controller/ClientController';
 
 const app = express();
 app.use(express.json());
