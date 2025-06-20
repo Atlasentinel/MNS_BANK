@@ -1,12 +1,3 @@
--- Script d'initialisation pour la base de données PostgreSQL
--- À exécuter dans psql en tant que superutilisateur (ex: postgres)
-CREATE DATABASE mns_bank;
-CREATE USER mns_user WITH ENCRYPTED PASSWORD 'mns_password';
-GRANT ALL PRIVILEGES ON DATABASE mns_bank TO mns_user;
-
--- Connecte-toi à la base nouvellement créée
-\c mns_bank
-
 -- Extension pour UUID si besoin
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
