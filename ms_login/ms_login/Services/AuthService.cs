@@ -20,7 +20,6 @@ namespace ms_login.Services
             Console.WriteLine($"Loading users from: {_jsonPath}");
 
             _users = new List<User>();
-
             try
             {
                 if (!File.Exists(_jsonPath))
@@ -58,6 +57,7 @@ namespace ms_login.Services
                 u.Login.Trim().Equals(request.Login.Trim(), StringComparison.OrdinalIgnoreCase) &&
                 u.Password == hashedPassword);
 
+
             if (user == null)
             {
                 Console.WriteLine("Authentication failed.");
@@ -70,6 +70,7 @@ namespace ms_login.Services
                 user.Token = Guid.NewGuid().ToString();
                 Console.WriteLine("Creating user token");
                 SaveUsersToJson(); // Sauvegarde les données utilisateurs
+
             }
 
             Console.WriteLine($"Authentication successful: {user.Login}, token: {user.Token}");
@@ -95,7 +96,6 @@ namespace ms_login.Services
             Console.WriteLine("❌ Invalid token.");
             return false;
         }
-
 
         private void SaveUsersToJson()
         {
@@ -123,6 +123,7 @@ namespace ms_login.Services
             {
                 Console.WriteLine($"❌ Error saving JSON: {ex.Message}");
                 Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+
             }
         }
     }
