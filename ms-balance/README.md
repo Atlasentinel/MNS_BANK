@@ -1,11 +1,5 @@
 # MICROSERVICE Balance
 
-## Participants :
-- Ziadi Noé : Chef de projet
-- Keovilay Loan : architecte logiciel
-- Mignon Valentin : Testeur
-- Boukada Adel : développeur
-
 ## DOCUMENTATION TECHNIQUE
 
 ### Installation
@@ -36,14 +30,14 @@ npm run dev
 
 ### Routes Utilisables
 
-#### **GET /api/accounts**
+#### **GET /clients**
 ##### Sortie:
-##### - Liste de Comptes
+##### - Liste des Clients
 
-#### **GET /api/account/:id**
-##### Sortie:
-##### - Objet Compte
-
-#### **GET /api/account/:id/amount**
+#### **GET /client/:id/balance/:token**
 ##### Sortie:
 ##### - Nombre flottant
+
+#### **GET /client/:id**
+##### Sortie:
+##### - Objet Client

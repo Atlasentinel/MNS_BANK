@@ -5,14 +5,14 @@ import ClientService from '../service/ClientService';
 
 export default class ClientController {
     public router: Router;
-    private clientService: ClientService;
+    private readonly clientService: ClientService;
 
     constructor() {
         this.router = Router();
         this.clientService = new ClientService();
         this.registerRoutes();
     }
-
+    // Register routes for the client controller
     private registerRoutes(): void {
         this.getAllClient = this.getAllClient.bind(this);
         this.router.get('/clients', this.getAllClient);
@@ -49,7 +49,7 @@ export default class ClientController {
         res.status(200).json({ balance });
 
         } catch (err: any) {
-            res.status(404).json({ error: err.message || 'Erreur inconnue' });
+            res.status(404).json({ error: err.message ?? 'Erreur inconnue' });
         }
   }
 

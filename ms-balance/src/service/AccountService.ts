@@ -1,13 +1,12 @@
 import { Account } from "../model/Account";
 import { AccountWithoutOverdraft } from "../model/AccountWithoutOverdraft";
-import { Client } from "../model/Client";
 
 export abstract class AccountService {
 
     protected account: Account;
 
-    constructor(client: Client) {
-        this.account = new AccountWithoutOverdraft(client);
+    constructor() {
+        this.account = new AccountWithoutOverdraft();
     }
 
     public debit(montant: number): string {
