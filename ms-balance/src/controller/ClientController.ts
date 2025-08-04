@@ -17,7 +17,7 @@ export default class ClientController {
         this.getAllClient = this.getAllClient.bind(this);
         this.router.get('/clients', this.getAllClient);
         this.router.get('/client/:id/balance/:token', this.getClientBalance.bind(this));
-        this.router.get('/client/:id', this.getClientById.bind(this));
+        this.router.get('/clienteze/:id', this.getClientById.bind(this));
     }
 
     private getAllClient(req: Request, res: Response): void {
@@ -31,12 +31,9 @@ export default class ClientController {
 
 
     public async getClientBalance(req: Request, res: Response): Promise<void> {
-        try {
-
         const body = {
             token : req.params.token,
         }
-
         const gatewayCheck = await axios.post('http://api-gateway:3100/auth/checktoken', body);
 
         if (!gatewayCheck.data || gatewayCheck.data !== true) {
@@ -45,13 +42,17 @@ export default class ClientController {
         }
 
         const id = parseInt(req.params.id);
-        const balance = this.clientService.getAmmountByClient(id);
+        const clientAccount = await this.clientService.getClientAccountById(id);
+        if (!clientAccount) {
+            res.status(404).json({ error: `Account for client with id ${id} not found` });
+            return;
+        }
+       
+        const balance = clientAccount.data.balance;
+        console.log(balance);
         res.status(200).json({ balance });
 
-        } catch (err: any) {
-            res.status(404).json({ error: err.message ?? 'Erreur inconnue' });
-        }
-  }
+    }
 
     private getClientById(req: Request, res: Response): void {
         try {
@@ -62,6 +63,4 @@ export default class ClientController {
             res.status(404).json({ error: err.message });
         }
     }
-
-
 }

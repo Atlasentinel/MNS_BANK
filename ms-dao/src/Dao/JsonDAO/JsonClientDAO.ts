@@ -2,6 +2,9 @@ import { Client } from '../../Model/Client';
 import ClientDAO from '../ClientDAO';
 
 export class JsonClientDAO implements ClientDAO {
+    findByLoginAndPassword(login: string, password: string): Promise<Client | null> {
+        throw new Error('Method not implemented.');
+    }
     public async create(cli: Client): Promise<String> {
         // TODO: implement create
         // return idC;

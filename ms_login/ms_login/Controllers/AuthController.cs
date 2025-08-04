@@ -1,25 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ms_login.Models;
 using ms_login.Services;
+using System.Threading.Tasks;
+using ms_login.Services.AuthService;
 
 namespace ms_login.Controllers
 {
-
     [ApiController]
-    [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    [Route("auth")]
+    public class AuthController(AuthService authService) : ControllerBase
     {
-        private readonly AuthService _authService = new();
-        
+        private readonly AuthService _authService = authService;
+
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var token = _authService.Authenticate(request);
-            if(token == null)
-                return Unauthorized(new { error = "Invalid credentials" });
+            // Ecrire dans la console salut
+            Console.WriteLine($"🔐 Tentative d'authentification : {request.Login}");
+            var token = await _authService.Authenticate(request); // <- ATTEND LA TASK
 
-            return Ok(new { token });
+            if (token == null)
+                return Unauthorized();
+
+            return Ok(token);
         }
-
     }
 }

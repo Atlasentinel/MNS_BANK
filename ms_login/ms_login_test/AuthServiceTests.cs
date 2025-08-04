@@ -16,20 +16,20 @@ namespace ms_login_test
         [TestInitialize]
         public void Setup()
         {
-            // Fichier JSON simulé pour les tests
+            // Fichier JSON simulï¿½ pour les tests
             TestDbPath = Path.Combine(AppContext.BaseDirectory, "db.json");
 
-            var testUsers = new UsersData
+            var testClients = new ClientsData
             {
-                Users = new List<User>
+                Clients = new List<Client>
                 {
-                    new User
+                    new Client
                     {
                         Login = "user1@mail.com",
                         Password = ms_login.Helper.HashHelper.ComputeSha512Hash("pass1"),
                         Token = "token1"
                     },
-                    new User
+                    new Client
                     {
                         Login = "user2@mail.com",
                         Password = ms_login.Helper.HashHelper.ComputeSha512Hash("pass2"),
@@ -39,7 +39,7 @@ namespace ms_login_test
             };
 
             var options = new JsonSerializerOptions { WriteIndented = true };
-            File.WriteAllText(TestDbPath, JsonSerializer.Serialize(testUsers, options));
+            File.WriteAllText(TestDbPath, JsonSerializer.Serialize(testClients, options));
         }
 
         [TestMethod]

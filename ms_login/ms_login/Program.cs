@@ -1,6 +1,10 @@
+using ms_login.Services.AuthService;
+
 //Initialisation du builder pour cr�er la webApp
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHttpClient();                // Pour HttpClientFactory
+builder.Services.AddScoped<AuthService>();    
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

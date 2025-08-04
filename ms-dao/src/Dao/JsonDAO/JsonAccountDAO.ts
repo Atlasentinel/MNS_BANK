@@ -3,6 +3,9 @@ import { Account } from '../../Model/Account';
 import AccountDAO from '../AccountDAO';
 
 export class JsonAccountDAO implements AccountDAO {
+    getBalance(id: number): Promise<number> {
+        throw new Error('Method not implemented.');
+    }
 
     public async create(item: Account): Promise<String> {
         // TODO: implement create        
