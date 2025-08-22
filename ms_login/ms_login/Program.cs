@@ -1,10 +1,9 @@
-using ms_login.Services.AuthService;
-
-//Initialisation du builder pour cr�er la webApp
+using ms_login.Services;
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHttpClient();                // Pour HttpClientFactory
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<AuthService>();    
+builder.Services.AddScoped<CheckService>();    
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -18,9 +17,23 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//Instantiation de l'app et d�marrage de la webApp
-app.UseHttpsRedirection();
+app.UseRouting();
+
 app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapGet("/", () => "Bienvenue sur l'API MNS_BANK !");
+
 app.MapControllers();
 
-app.Run("http://0.0.0.0:3001");
+Console.WriteLine("Application prête à démarrer sur http://localhost:3001");
+
+try
+{
+    app.Run("http://0.0.0.0:3001");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Erreur au démarrage : {ex.Message}");
+    throw;
+}

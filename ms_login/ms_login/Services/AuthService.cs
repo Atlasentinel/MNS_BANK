@@ -21,15 +21,15 @@ namespace ms_login.Services
         public async Task<string?> Authenticate(LoginRequest request)
         {
             var hashedPassword = HashHelper.ComputeSha512Hash(request.Password ?? "");
-            Console.WriteLine($"🔐 Tentative d'authentification : {request.Login} / Hash: {hashedPassword}");
+            Console.WriteLine($"Tentative d'authentification : {request.Login} / Hash: {request.Password}");
 
             var httpClient = _httpClientFactory.CreateClient();
-            var url = $"http://ms-dao/clients/login";
+            var url = $"http://ms-dao:3200/client/login";
 
             var payload = new
             {
                 login = request.Login,
-                password = hashedPassword
+                password = request.Password
             };
 
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
@@ -37,79 +37,96 @@ namespace ms_login.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                Console.WriteLine("❌ Authentification échouée : DAO n’a pas trouvé le client.");
+                Console.WriteLine("Authentification échouée : DAO n’a pas trouvé le client.");
                 return null;
             }
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
             var client = JsonSerializer.Deserialize<Client>(jsonResponse);
 
-            if (client == null)
+            if (client == null || string.IsNullOrEmpty(client.Login))
             {
-                Console.WriteLine("❌ DAO a retourné un client null.");
+                Console.WriteLine("DAO a retourné un client null ou incomplet.");
                 return null;
             }
 
             if (string.IsNullOrEmpty(client.Token))
             {
                 client.Token = Guid.NewGuid().ToString();
-                Console.WriteLine("🪪 Nouveau token généré.");
+                Console.WriteLine("Nouveau token généré.");
 
-                await SaveClient(client);
+                var updateUrl = "http://ms-dao:3200/client/update";
+
+                var updatePayload = new
+                {
+                    id = client.Id,
+                    name = client.Name,
+                    password = client.Password,
+                    login = client.Login,
+                    token = client.Token
+                };
+
+                var updateContent = new StringContent(JsonSerializer.Serialize(updatePayload), Encoding.UTF8, "application/json");
+                var updateResponse = await httpClient.PostAsync(updateUrl, updateContent);
+
+                if (!updateResponse.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Échec de la mise à jour du token utilisateur.");
+                    return null;
+                }
+
+                Console.WriteLine("Token mis à jour dans la base via POST.");
             }
 
-            Console.WriteLine($"✅ Authentification réussie pour : {client.Login}");
+            Console.WriteLine($"Authentification réussie pour : {client.Login}");
             return client.Token;
         }
 
-        public async Task<bool> CheckToken(string? token)
+        public async Task<string?> SaveClient(RegisterRequest client)
         {
-            if (string.IsNullOrWhiteSpace(token))
-            {
-                Console.WriteLine("❌ Token vide ou nul.");
-                return false;
-            }
-
             var httpClient = _httpClientFactory.CreateClient();
-            var url = $"http://ms-dao/clients/token/{token}";
 
             try
             {
-                var response = await httpClient.GetAsync(url);
-                if (!response.IsSuccessStatusCode) return false;
+                client.Password = HashHelper.ComputeSha512Hash(client.Password ?? "");
 
-                var jsonResponse = await response.Content.ReadAsStringAsync();
-                var client = JsonSerializer.Deserialize<Client>(jsonResponse);
-
-                if (client == null) return false;
-
-                Console.WriteLine($"✅ Token valide pour : {client.Login}");
-                return true;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"❌ Erreur lors de la vérification du token : {e.Message}");
-                return false;
-            }
-        }
-
-        private async Task SaveClient(Client client)
-        {
-            var httpClient = _httpClientFactory.CreateClient();
-            try
-            {
-                string url = "http://ms-dao/client/create";
+                string url = "http://ms-dao:3200/client/create";
                 HttpResponseMessage response = await httpClient.PostAsJsonAsync(url, client);
                 response.EnsureSuccessStatusCode();
 
                 string responseBody = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"Réponse ms-dao : {responseBody}");
                 Console.WriteLine("Données utilisateur sauvegardées via API.");
+                return responseBody;
             }
             catch (HttpRequestException e)
             {
                 Console.WriteLine($"Erreur HTTP (ms-dao) : {e.Message}");
+                return null;
             }
         }
+
+        // public async Task<string?> SaveClient(RegisterRequest client)
+        // {
+        //     var httpClient = _httpClientFactory.CreateClient();
+        //     try
+        //     {
+        //         string url = "http://ms-dao:3200/client/create";
+        //         HttpResponseMessage response = await httpClient.PostAsJsonAsync(url, client);
+        //         response.EnsureSuccessStatusCode();
+
+        //         string responseBody = await response.Content.ReadAsStringAsync();
+        //         Console.WriteLine($"Réponse ms-dao : {responseBody}");
+        //         Console.WriteLine("Données utilisateur sauvegardées via API.");
+        //         return responseBody;
+        //     }
+        //     catch (HttpRequestException e)
+        //     {
+        //         Console.WriteLine($"Erreur HTTP (ms-dao) : {e.Message}");
+        //         return null;
+        //     }
+        // }
     }
 }
+
+    

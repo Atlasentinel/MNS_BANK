@@ -1,94 +1,141 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestPlatform.TestHost;
+using Moq;
+using Moq.Protected;
 using ms_login.Models;
 using ms_login.Services;
-using System.IO;
-using System.Text.Json;
-using System.Collections.Generic;
-using System;
+using Xunit;
 
-namespace ms_login_test
+public class AuthServiceTests
 {
-    [TestClass]
-    public class AuthServiceTests
+    private HttpClient CreateMockedClient(HttpResponseMessage responseMessage)
     {
-        private string? TestDbPath;
+        var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
 
-        [TestInitialize]
-        public void Setup()
+        handlerMock
+           .Protected()
+           .Setup<Task<HttpResponseMessage>>(
+              "SendAsync",
+              ItExpr.IsAny<HttpRequestMessage>(),
+              ItExpr.IsAny<CancellationToken>()
+           )
+           .ReturnsAsync(responseMessage)
+           .Verifiable();
+
+        return new HttpClient(handlerMock.Object);
+    }
+
+    private IHttpClientFactory CreateMockHttpClientFactory(HttpClient client)
+    {
+        var mockFactory = new Mock<IHttpClientFactory>();
+        mockFactory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(client);
+        return mockFactory.Object;
+    }
+
+    [Fact]
+    public async Task Authenticate_ShouldReturnToken_WhenClientIsValid()
+    {
+        var clientResponse = new Client
         {
-            // Fichier JSON simul� pour les tests
-            TestDbPath = Path.Combine(AppContext.BaseDirectory, "db.json");
+            Id = 1,
+            Login = "testuser",
+            Password = "password",
+            Token = null,
+            Name = "Test"
+        };
 
-            var testClients = new ClientsData
-            {
-                Clients = new List<Client>
-                {
-                    new Client
-                    {
-                        Login = "user1@mail.com",
-                        Password = ms_login.Helper.HashHelper.ComputeSha512Hash("pass1"),
-                        Token = "token1"
-                    },
-                    new Client
-                    {
-                        Login = "user2@mail.com",
-                        Password = ms_login.Helper.HashHelper.ComputeSha512Hash("pass2"),
-                        Token = null
-                    }
-                }
-            };
-
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            File.WriteAllText(TestDbPath, JsonSerializer.Serialize(testClients, options));
-        }
-
-        [TestMethod]
-        public void Authenticate_ValidCredentials_ReturnsToken()
+        var httpResponse = new HttpResponseMessage(HttpStatusCode.OK)
         {
-            var service = new AuthServiceTestable(TestDbPath);
-            var request = new LoginRequest
-            {
-                Login = "user1@mail.com",
-                Password = "pass1"
-            };
+            Content = new StringContent(JsonSerializer.Serialize(clientResponse), Encoding.UTF8, "application/json")
+        };
 
-            var result = service.Authenticate(request);
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual("token1", result);
-        }
-
-        [TestMethod]
-        public void Authenticate_InvalidPassword_ReturnsNull()
+        var updateResponse = new HttpResponseMessage(HttpStatusCode.OK)
         {
-            var service = new AuthServiceTestable(TestDbPath);
-            var request = new LoginRequest
-            {
-                Login = "user1@mail.com",
-                Password = "wrongpassword"
-            };
+            Content = new StringContent("updated")
+        };
 
-            var result = service.Authenticate(request);
+        var handlerMock = new Mock<HttpMessageHandler>();
 
-            Assert.IsNull(result);
-        }
+        var sequence = new MockSequence();
+        handlerMock
+            .InSequence(sequence)
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>("SendAsync",
+                ItExpr.Is<HttpRequestMessage>(req => req.RequestUri!.ToString().Contains("/client/login")),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(httpResponse);
 
-        [TestMethod]
-        public void CheckToken_ValidToken_ReturnsTrue()
+        handlerMock
+            .InSequence(sequence)
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>("SendAsync",
+                ItExpr.Is<HttpRequestMessage>(req => req.RequestUri!.ToString().Contains("/client/update")),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(updateResponse);
+
+        var httpClient = new HttpClient(handlerMock.Object);
+        var factory = CreateMockHttpClientFactory(httpClient);
+        var service = new AuthService(factory);
+
+        var loginRequest = new LoginRequest
         {
-            var service = new AuthServiceTestable(TestDbPath);
-            var isValid = service.CheckToken("token1");
+            Login = "testuser",
+            Password = "password"
+        };
 
-            Assert.IsTrue(isValid);
-        }
+        var result = await service.Authenticate(loginRequest);
 
-        [TestMethod]
-        public void CheckToken_InvalidToken_ReturnsFalse()
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    public async Task CheckToken_ShouldReturnTrue_WhenTokenMatches()
+    {
+        var expectedClient = new Client
         {
-            var service = new AuthServiceTestable(TestDbPath);
-            var isValid = service.CheckToken("invalid-token");
+            Id = 1,
+            Token = "valid-token",
+            Login = "test"
+        };
 
-            Assert.IsFalse(isValid);
-        }
+        var httpResponse = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(JsonSerializer.Serialize(expectedClient))
+        };
+
+        var httpClient = CreateMockedClient(httpResponse);
+        var factory = CreateMockHttpClientFactory(httpClient);
+        var service = new AuthService(factory);
+
+        var result = await service.CheckToken("valid-token", 1);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task CheckToken_ShouldReturnFalse_WhenTokenDoesNotMatch()
+    {
+        var expectedClient = new Client
+        {
+            Id = 1,
+            Token = "different-token",
+            Login = "test"
+        };
+
+        var httpResponse = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(JsonSerializer.Serialize(expectedClient))
+        };
+
+        var httpClient = CreateMockedClient(httpResponse);
+        var factory = CreateMockHttpClientFactory(httpClient);
+        var service = new AuthService(factory);
+
+        var result = await service.CheckToken("wrong-token", 1);
+
+        Assert.False(result);
     }
 }

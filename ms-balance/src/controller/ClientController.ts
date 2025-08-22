@@ -17,7 +17,7 @@ export default class ClientController {
         this.getAllClient = this.getAllClient.bind(this);
         this.router.get('/clients', this.getAllClient);
         this.router.get('/client/:id/balance/:token', this.getClientBalance.bind(this));
-        this.router.get('/clienteze/:id', this.getClientById.bind(this));
+        this.router.get('/client/:id', this.getClientById.bind(this));
     }
 
     private getAllClient(req: Request, res: Response): void {
@@ -32,6 +32,7 @@ export default class ClientController {
 
     public async getClientBalance(req: Request, res: Response): Promise<void> {
         const body = {
+            id: parseInt(req.params.id),
             token : req.params.token,
         }
         const gatewayCheck = await axios.post('http://api-gateway:3100/auth/checktoken', body);

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ms_login.Services;
+using ms_login.Models;
 using System.Threading.Tasks;
 
 namespace ms_login.Controllers
@@ -8,17 +9,17 @@ namespace ms_login.Controllers
     [Route("check")]
     public class CheckController : ControllerBase
     {
-        private readonly AuthService _authService;
+        private readonly CheckService _checkService;
 
-        public CheckController(AuthService authService) // <- CORRECT maintenant
+        public CheckController(CheckService checkService)
         {
-            _authService = authService;
+            _checkService = checkService;
         }
 
-        [HttpGet("token")]
-        public async Task<IActionResult> CheckToken([FromQuery] string token)
+        [HttpPost("token")]
+        public async Task<IActionResult> CheckToken([FromBody] TokenRequest request)
         {
-            bool isValid = await _authService.CheckToken(token); // <- ATTEND LA TASK
+            bool isValid = await _checkService.CheckToken(request.Token, request.Id);
             return Ok(isValid);
         }
     }
