@@ -21,7 +21,7 @@ namespace ms_login.Services
         public async Task<string?> Authenticate(LoginRequest request)
         {
             var hashedPassword = HashHelper.ComputeSha512Hash(request.Password ?? "");
-            Console.WriteLine($"Tentative d'authentification : {request.Login} / Hash: {request.Password}");
+            Console.WriteLine($"Tentative d'authentification : {request.Login} / Hash: {hashedPassword}");
 
             var httpClient = _httpClientFactory.CreateClient();
             var url = $"http://ms-dao:3200/client/login";
@@ -29,7 +29,7 @@ namespace ms_login.Services
             var payload = new
             {
                 login = request.Login,
-                password = request.Password
+                password = hashedPassword
             };
 
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");

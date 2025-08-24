@@ -21,16 +21,9 @@ CREATE TABLE IF NOT EXISTS accounts (
 -- Insertion de données de test pour clients (sans les IDs manuels)
 INSERT INTO clients (name, login, password, token)
 VALUES
-  ('Alice Dupont', 'alice', 'password123', 'token123'),
-  ('Bob Martin', 'bob', 'password456abc', 'token456'),
-  ('Charlie Durand', 'charlie', 'password789xyz', 'token789');
-
--- Insertion de comptes (récupère les IDs clients dynamiquement)
--- Cela suppose que l'ordre des insertions clients est bien : Alice (1), Bob (2), Charlie (3)
--- Sinon, utiliser des sous-requêtes SELECT
+  ('Bob Martin', 'bobausaure', '2bcdd13ea781dd479c0e6359e01415fbbec7d4b6f1550d4dca363cda159cd00a9bb4c77331e7ea8fd84f0403c10e0e44b95390c54295eb1c63bd65362db0211a', 'token456')
 
 INSERT INTO accounts (client_id, balance)
 VALUES
-  (1, 1000.00),
-  (2, 1500.50),
-  (3, 2000.75);
+  (1, 1000000.00)
+

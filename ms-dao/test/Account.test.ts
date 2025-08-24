@@ -1,8 +1,8 @@
-import { SQLAccountDAO } from "../src/Dao/SQL/SQLAccountDAO"
-import { Account } from '../src/Model/Account';
-import { ConnexionSQL } from '../src/ConnexionSQL/Connexion';
+import { SQLAccountDAO } from "../src/Dao/SQL/SQLAccountDAO";
+import { Account } from "../src/Model/Account";
+import { ConnexionSQL } from "../src/ConnexionSQL/Connexion";
 
-jest.mock('../src/ConnexionSQL/Connexion');
+jest.mock("../src/ConnexionSQL/Connexion");
 
 const mockQuery = jest.fn();
 const mockRelease = jest.fn();
@@ -15,7 +15,7 @@ const mockGetConnection = jest.fn().mockResolvedValue({
   getConnection: mockGetConnection,
 });
 
-describe('SQLAccountDAO', () => {
+describe("SQLAccountDAO", () => {
   let dao: SQLAccountDAO;
 
   beforeEach(() => {
@@ -23,34 +23,32 @@ describe('SQLAccountDAO', () => {
     jest.clearAllMocks();
   });
 
-  it('should return correct balance for existing account', async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [{ balance: 2500.75 }] });
+  it("should return Account instance for existing client_id", async () => {
+    const fakeRow = { id: 10, client_id: 5, balance: 1234.56 };
+    mockQuery.mockResolvedValueOnce({ rows: [fakeRow] });
 
-    const balance = await dao.findById(1);
+    const account = await dao.findById(5);
 
-    expect(mockQuery).toHaveBeenCalledWith('SELECT balance FROM accounts WHERE id = 1');
-    expect(balance).toBe(1000.00);
+    expect(mockGetConnection).toHaveBeenCalled();
+    expect(mockQuery).toHaveBeenCalledWith("SELECT * FROM accounts WHERE client_id = 5");
+    expect(account).toBeInstanceOf(Account);
+    expect(account.id).toBe(10);
+    expect(account.clientId).toBe(5);
+    expect(account.balance).toBe(1234.56);
     expect(mockRelease).toHaveBeenCalled();
   });
 
-  it('should throw error if account is not found', async () => {
+  it("should throw error if account not found", async () => {
     mockQuery.mockResolvedValueOnce({ rows: [] });
 
-    await expect(dao.findById(99)).rejects.toThrow('Account not found');
+    await expect(dao.findById(99)).rejects.toThrow("Account not found");
     expect(mockRelease).toHaveBeenCalled();
   });
 
-  it('should reject on DB error', async () => {
-    mockQuery.mockRejectedValueOnce(new Error('DB crash'));
+  it("should reject on DB error", async () => {
+    mockQuery.mockRejectedValueOnce(new Error("DB crash"));
 
-    await expect(dao.findById(2)).rejects.toThrow('DB crash');
+    await expect(dao.findById(2)).rejects.toThrow("DB crash");
     expect(mockRelease).toHaveBeenCalled();
   });
-
-  it('should return a dummy account from findById (mocked)', async () => {
-    const account = await dao.findById(123);
-    expect(account).toBeInstanceOf(Account);
-    expect(account.balance).toBe(1000.0);
-  });
-
 });

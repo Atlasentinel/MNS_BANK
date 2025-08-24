@@ -1,15 +1,15 @@
-import { Account} from './Account';
 export class Client {
-    numberClient: number;
-    address: string;
+    id: number;
     name: string;
-    account: Account;
+    login: string;
+    password: string;
+    token?: string|null;
 
-
-    constructor(numberClient: number, address: string, name: string, account: Account) {
-        this.numberClient = numberClient;
-        this.address = address;
+    constructor(id: number, name: string, email: string, password: string, token?: string) {
+        this.id = id;
         this.name = name;
-        this.account = account;
+        this.login = email;
+        this.password = password;
+        this.token = token;
     }
 }
