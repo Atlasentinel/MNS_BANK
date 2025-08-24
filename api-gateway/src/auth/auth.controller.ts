@@ -10,9 +10,15 @@ export class AuthController {
     return this.authService.authenticate(userCredentials);
   }
 
+  @Post('register')
+  create(@Body() userCredentials: { name: string; login: string; password: string; token: string }) {
+    return this.authService.create(userCredentials);
+  }
+
+
   @Post('checktoken')
-  checkToken(@Body() token: { token: string }) {
-    return true
-    return this.authService.checkToken(token);
+  checkToken(@Body() userToken: { id: number; token: string }) {
+    // return true
+    return this.authService.checkToken(userToken);
   }
 }

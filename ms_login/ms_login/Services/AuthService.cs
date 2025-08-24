@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using ms_login.Models;
 using ms_login.Helper;
 
@@ -10,102 +11,122 @@ namespace ms_login.Services
 {
     public class AuthService
     {
-        private readonly List<User> _users;
-        private readonly string _jsonPath;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public AuthService()
+        public AuthService(IHttpClientFactory httpClientFactory)
         {
-            _jsonPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Bdd", "db.json"));
-            Console.WriteLine($"📁 Chargement des utilisateurs depuis : {_jsonPath}");
-
-            _users = LoadUsersFromJson();
+            _httpClientFactory = httpClientFactory;
         }
 
-        public string Authenticate(LoginRequest request)
+        public async Task<string?> Authenticate(LoginRequest request)
         {
-            var hashedPassword = HashHelper.ComputeSha512Hash(request.Password);
-            Console.WriteLine($"🔐 Tentative d'authentification : {request.Login} / Hash: {hashedPassword}");
+            var hashedPassword = HashHelper.ComputeSha512Hash(request.Password ?? "");
+            Console.WriteLine($"Tentative d'authentification : {request.Login} / Hash: {hashedPassword}");
 
-            var user = _users.FirstOrDefault(u =>
-                u.Login.Trim().Equals(request.Login.Trim(), StringComparison.OrdinalIgnoreCase) &&
-                u.Password == hashedPassword);
+            var httpClient = _httpClientFactory.CreateClient();
+            var url = $"http://ms-dao:3200/client/login";
 
-            if (user == null)
+            var payload = new
             {
-                Console.WriteLine("❌ Authentification échouée.");
+                login = request.Login,
+                password = hashedPassword
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync(url, content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Authentification échouée : DAO n’a pas trouvé le client.");
                 return null;
             }
 
-            if (string.IsNullOrEmpty(user.Token))
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            var client = JsonSerializer.Deserialize<Client>(jsonResponse);
+
+            if (client == null || string.IsNullOrEmpty(client.Login))
             {
-                user.Token = Guid.NewGuid().ToString();
-                Console.WriteLine("🪪 Nouveau token généré.");
-                SaveUsersToJson(_users);
+                Console.WriteLine("DAO a retourné un client null ou incomplet.");
+                return null;
             }
 
-            Console.WriteLine($"✅ Authentification réussie pour : {user.Login}");
-            return user.Token;
-        }
-
-        public bool CheckToken(string token)
-        {
-            if (string.IsNullOrWhiteSpace(token))
+            if (string.IsNullOrEmpty(client.Token))
             {
-                Console.WriteLine("❌ Token vide ou nul.");
-                return false;
-            }
+                client.Token = Guid.NewGuid().ToString();
+                Console.WriteLine("Nouveau token généré.");
 
-            var user = _users.FirstOrDefault(u => u.Token == token);
-            var isValid = user != null;
+                var updateUrl = "http://ms-dao:3200/client/update";
 
-            Console.WriteLine(isValid
-                ? $"✅ Token valide pour : {user.Login}"
-                : "❌ Token invalide.");
-
-            return isValid;
-        }
-
-        private List<User> LoadUsersFromJson()
-        {
-            try
-            {
-                if (!File.Exists(_jsonPath))
+                var updatePayload = new
                 {
-                    Console.WriteLine("⚠️ Fichier JSON introuvable. Création d'un nouveau.");
-                    SaveUsersToJson(new List<User>());
-                    return new List<User>();
+                    id = client.Id,
+                    name = client.Name,
+                    password = client.Password,
+                    login = client.Login,
+                    token = client.Token
+                };
+
+                var updateContent = new StringContent(JsonSerializer.Serialize(updatePayload), Encoding.UTF8, "application/json");
+                var updateResponse = await httpClient.PostAsync(updateUrl, updateContent);
+
+                if (!updateResponse.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Échec de la mise à jour du token utilisateur.");
+                    return null;
                 }
 
-                var json = File.ReadAllText(_jsonPath);
-                var data = JsonSerializer.Deserialize<UsersData>(json);
-                var users = data?.Users ?? new List<User>();
+                Console.WriteLine("Token mis à jour dans la base via POST.");
+            }
 
-                Console.WriteLine($"👥 Utilisateurs chargés : {users.Count}");
-                return users;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"❌ Erreur lors du chargement des utilisateurs : {ex.Message}");
-            }
+            Console.WriteLine($"Authentification réussie pour : {client.Login}");
+            return client.Token;
         }
 
-        private void SaveUsersToJson(List<User> users)
+        public async Task<string?> SaveClient(RegisterRequest client)
         {
+            var httpClient = _httpClientFactory.CreateClient();
+
             try
             {
-                var directory = Path.GetDirectoryName(_jsonPath);
-                if (!Directory.Exists(directory))
-                    Directory.CreateDirectory(directory);
+                client.Password = HashHelper.ComputeSha512Hash(client.Password ?? "");
 
-                var json = JsonSerializer.Serialize(new UsersData { Users = users }, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(_jsonPath, json);
+                string url = "http://ms-dao:3200/client/create";
+                HttpResponseMessage response = await httpClient.PostAsJsonAsync(url, client);
+                response.EnsureSuccessStatusCode();
 
-                Console.WriteLine("✅ Données utilisateurs sauvegardées avec succès.");
+                string responseBody = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Réponse ms-dao : {responseBody}");
+                Console.WriteLine("Données utilisateur sauvegardées via API.");
+                return responseBody;
             }
-            catch (Exception ex)
+            catch (HttpRequestException e)
             {
-                throw new Exception($"❌ Erreur lors de la sauvegarde : {ex.Message}\n{ex.StackTrace}");
+                Console.WriteLine($"Erreur HTTP (ms-dao) : {e.Message}");
+                return null;
             }
         }
+
+        // public async Task<string?> SaveClient(RegisterRequest client)
+        // {
+        //     var httpClient = _httpClientFactory.CreateClient();
+        //     try
+        //     {
+        //         string url = "http://ms-dao:3200/client/create";
+        //         HttpResponseMessage response = await httpClient.PostAsJsonAsync(url, client);
+        //         response.EnsureSuccessStatusCode();
+
+        //         string responseBody = await response.Content.ReadAsStringAsync();
+        //         Console.WriteLine($"Réponse ms-dao : {responseBody}");
+        //         Console.WriteLine("Données utilisateur sauvegardées via API.");
+        //         return responseBody;
+        //     }
+        //     catch (HttpRequestException e)
+        //     {
+        //         Console.WriteLine($"Erreur HTTP (ms-dao) : {e.Message}");
+        //         return null;
+        //     }
+        // }
     }
 }
+
+    

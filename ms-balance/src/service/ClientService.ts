@@ -1,5 +1,6 @@
 
 import axios from 'axios';
+import { Account } from '../model/Account';
 import { Client } from '../model/Client';
 
 
@@ -13,14 +14,6 @@ export default class ClientService {
         return response.data.clients;
     }
 
-    public async getAmmountByClient(id: number): Promise<number> {
-        const client = await this.getClientById(id);
-        if (client && client.account && typeof client.account.getBalance() === 'number') {
-            return client.account.getBalance();
-        }
-        throw new Error("Account not found or balance is not a number");
-    }
-
     public async getClientById(id: number): Promise<Client> {
         const response = await axios.get<{ client: Client }>(`http://ms-dao:3200/client/${id}`);
         if (!response.data.client) {
@@ -30,10 +23,10 @@ export default class ClientService {
     }
 
     public async getClientAccountById(id: number): Promise<any> {
-        const client:Client = await this.getClientById(id);
-        if (!client.account) {
-            throw new Error(`Account for client with id ${id} not found`);
+        const account = await axios.get<{ account: Account }>(`http://ms-dao:3200/client/${id}/account`);
+        if (!account) {
+            throw new Error(`Account for account with id ${id} not found`);
         }
-        return client.account;
+        return account;
     }
 }
