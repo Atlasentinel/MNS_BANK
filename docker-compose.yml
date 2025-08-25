@@ -29,17 +29,6 @@ services:
     depends_on:
       - postgres
 
-  # ms-transaction:
-  #   build: ./ms-transaction
-  #   container_name: ms-transaction
-  #   env_file:
-  #     - .env.db
-  #     - ./ms-transaction/.env
-  #   ports:
-  #     - "8000:8000"
-  #   depends_on:
-  #     - postgres
-  #     - ms-balance
   ms-login:
     build: ./ms_login/ms_login
     container_name: ms-login
