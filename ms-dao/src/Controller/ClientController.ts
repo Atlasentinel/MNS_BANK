@@ -8,7 +8,7 @@ import DAOFactory from '../Dao/Factory/DAOFactory';
 
 export default class ClientController {
     public router: Router;
-    private clientDAO: IDAO<Client> | undefined;
+    private clientDAO: ClientDAO | undefined;
 
     constructor() {
         this.router = Router();
@@ -17,17 +17,34 @@ export default class ClientController {
     }
 
 private registerRoutes(): void {
+    this.getClientByLoginAndPassword = this.getClientByLoginAndPassword.bind(this);
     this.getAllClient = this.getAllClient.bind(this);
     this.getClientById = this.getClientById.bind(this);
     this.createClient = this.createClient.bind(this);
     this.deleteClient = this.deleteClient.bind(this);
     this.updateClient = this.updateClient.bind(this);
 
+    this.router.post('/client/login', this.getClientByLoginAndPassword);
     this.router.get('/clients', this.getAllClient);
     this.router.get('/client/:id', this.getClientById);
     this.router.post('/client/create', this.createClient);
     this.router.get('/client/:id/delete', this.deleteClient);
     this.router.post('/client/update', this.updateClient);
+}
+
+private async getClientByLoginAndPassword(req: Request, res: Response): Promise<void> {
+    try {
+        const { login, password } = req.body;
+        const client = await this.clientDAO?.findByLoginAndPassword(login, password);
+        if (client) {
+            res.status(200).json(client);
+        } else {
+            res.status(404).json({ error: 'Client not found' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Erreur serveur");
+    }
 }
 
 private async getAllClient(req: Request, res: Response): Promise<void> {

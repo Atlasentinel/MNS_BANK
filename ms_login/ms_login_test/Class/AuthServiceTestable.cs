@@ -8,12 +8,12 @@ public class AuthServiceTestable : AuthService
     public AuthServiceTestable(string path)
     {
         var json = File.ReadAllText(path);
-        var data = JsonSerializer.Deserialize<UsersData>(json);
-        var users = data?.Users ?? new List<User>();
+        var data = JsonSerializer.Deserialize<ClientsData>(json);
+        var clients = data?.Clients ?? new List<Client>();
 
         typeof(AuthService)
-            .GetField("_users", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            ?.SetValue(this, users);
+            .GetField("_clients", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.SetValue(this, clients);
 
         typeof(AuthService)
             .GetField("_jsonPath", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)

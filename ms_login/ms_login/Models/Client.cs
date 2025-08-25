@@ -2,8 +2,12 @@
 
 namespace ms_login.Models
 {
-    public class User
+    public class Client
     {
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
+        [JsonPropertyName("name")]
+        public string? Name { get; set; }
         [JsonPropertyName("login")]
         public string? Login { get; set; }
 

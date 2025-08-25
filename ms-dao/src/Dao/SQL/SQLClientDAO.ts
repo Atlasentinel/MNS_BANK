@@ -3,12 +3,34 @@ import ClientDAO from '../ClientDAO';
 import { ConnexionSQL } from '../../ConnexionSQL/Connexion';
 
 export class SQLClientDAO implements ClientDAO {
+    
+    async findByLoginAndPassword(login: string, password: string): Promise<Client | null> {
+        let db = ConnexionSQL.getInstance();
+        let connexion = await db.getConnection();
+
+        let query = `SELECT * FROM clients WHERE login = '${login}' AND password = '${password}'`;
+
+        try {
+            let result = await connexion.query(query);
+            let clients: Client[] = result.rows.map(row =>
+                new Client(row.id, row.name, row.login, row.password, row.token)
+            );
+            return clients[0] || null;
+
+        } catch (error) {
+            console.error("Error finding client:", error);
+            throw new Error("Database operation failed");
+        } finally {
+            connexion.release();
+        }
+    }
+
     public async create(cli: Client): Promise<String> {
 
         let db = ConnexionSQL.getInstance();
         let connexion = await db.getConnection();
 
-        let query = `INSERT INTO clients (id, name, login, password, token) VALUES ('${cli.id}', '${cli.name}', '${cli.login}' , '${cli.password}' , '${cli.token}'  )`;
+        let query = `INSERT INTO clients (name, login, password, token) VALUES ('${cli.name}', '${cli.login}' , '${cli.password}' , '${cli.token}'  )`;
 
         try {
             await connexion.query(query);
@@ -23,13 +45,24 @@ export class SQLClientDAO implements ClientDAO {
     }
 
     public async update(cli: Client): Promise<boolean> {
-        // TODO: implement update
-        return true;
+        let db = ConnexionSQL.getInstance();
+        let connexion = await db.getConnection();
+        let query = `UPDATE clients SET name = '${cli.name}', login = '${cli.login}', password = '${cli.password}', token = '${cli.token}' WHERE id = ${cli.id}`;
+        try {
+            await connexion.query(query);
+            return true;
+        } catch (error) {
+            console.error("Error updating client:", error);
+            throw new Error("Database operation failed");
+        } finally {
+            connexion.release(); 
+        }
     }
+    
     public async delete(id: number): Promise<String> {
-        // TODO: implement delete
-        return "Client deleted successfully";
+        return "todo";
     }
+
     public async findAll(): Promise<Client[]> {
         let db = ConnexionSQL.getInstance();
         let connexion = await db.getConnection();
@@ -54,7 +87,6 @@ export class SQLClientDAO implements ClientDAO {
     }
 
     public async findById(id: number): Promise<Client> {
-        // TODO: implement findById
         let db = ConnexionSQL.getInstance();
         let connexion = await db.getConnection();
         let query = `SELECT * FROM clients WHERE id = ${id}`;

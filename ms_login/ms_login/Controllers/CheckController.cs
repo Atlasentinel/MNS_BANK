@@ -1,21 +1,26 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ms_login.Models;
 using ms_login.Services;
+using ms_login.Models;
+using System.Threading.Tasks;
 
 namespace ms_login.Controllers
 {
+    [ApiController]
+    [Route("check")]
+    public class CheckController : ControllerBase
+    {
+        private readonly CheckService _checkService;
 
-        [ApiController]
-        [Route("api/[controller]")]
-        public class CheckController : ControllerBase
+        public CheckController(CheckService checkService)
         {
-            private readonly AuthService _authService = new();
+            _checkService = checkService;
+        }
 
-            [HttpPost("token")]
-            public IActionResult Login([FromBody] TokenRequest request)
-            {
-                bool tokenExists = _authService.CheckToken(request.Token);
-                return Ok(new LoginResponse { IsTokenExist = tokenExists });
-            }
+        [HttpPost("token")]
+        public async Task<IActionResult> CheckToken([FromBody] TokenRequest request)
+        {
+            bool isValid = await _checkService.CheckToken(request.Token, request.Id);
+            return Ok(isValid);
+        }
     }
 }

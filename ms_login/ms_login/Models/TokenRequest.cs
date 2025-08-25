@@ -6,5 +6,7 @@ namespace ms_login.Models
     {
         [JsonPropertyName("token")]
         public string? Token { get; set; }
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
     }
 }
