@@ -33,7 +33,17 @@ docker-compose up --build
 
 Le fichier init.sql sera automatiquement exécuté pour initialiser la base de données. Un petit jeu de donnée sera déjà inséré.
 
-Néanmoins, si les données de la base de donnée ne sont pas présentes, il faudra les insérer manuellement.
+Il est possible qu'au premier démarrage le docker de postgres (ms-bank-db) se ferme, dans ce cas il faut simplement le redémarrer simplement depuis docker desktop.
+
+Néanmoins, si les données de la base de donnée ne sont pas présentes suite à l'erreur d'initialisation de ms-bank-db, il faudra les insérer manuellement.
+
+Adminer est déjà installé et accessible à l'adresse suivante : http://localhost:8080
+- Choisir postgresql comme système de gestion de base de données
+- Se connecter avec les identifiants suivants :
+  - Serveur : postgres
+  - Utilisateur : testuser
+  - Mot de passe : voir données Trello
+  - Base de données : testdb
 
 il suffit de faire une requête SQL d'insertion pour client:
 
@@ -50,17 +60,6 @@ VALUES
   (1, 1000000.00)
 ```
 
-Adminer est déjà installé et accessible à l'adresse suivante : http://localhost:8080
-- Choisir postgresql comme système de gestion de base de données
-- Se connecter avec les identifiants suivants :
-  - Serveur : postgres
-  - Utilisateur : testuser
-  - Mot de passe : voir données Trello
-  - Base de données : testdb
-
-Il est possible qu'au premier démarrage le docker de postgres (mns-bank-db) se ferme, dans ce cas il faut simplement le redémarrer simplement depuis docker desktop.
-
-
 ## UTILISATION
 
 Vous pourrez intéragir avec l'API via Postman, Reqbin, voir swagger pour le microservice ms-login.
@@ -69,11 +68,11 @@ Les endpoints sont les suivants (passer par l'api-gateway localhost:3100) :
 - POST /auth/login : pour s'authentifier
 - POST /auth/register : pour créer un compte
 - POST /auth/checktoken : pour vérifier la validité d'un token
-- GET /balance/:id : pour obtenir le solde d'un utilisateur (besoin d'un token valide dans les headers)
+- GET /balance/:id : pour obtenir le solde d'un utilisateur (besoin d'un token valide dans l'URL')
 
 Exemple complet :
 
-Register un utilisateur (login: test, password: test) :
+Inscrire un utilisateur (login: test, password: test) :
 Se rendre à l'endpoint http://localhost:3100/auth/register
 {
     "name": "Falcon",
@@ -88,12 +87,20 @@ Se rendre à l'endpoint http://localhost:3100/auth/login
     "login": "bobausaure",
     "password": "Gribou"
 }
+La requete renverra un token qui sera utilisé pour toutes les autres requêtes nécessitant une authentification
 
-Verifier la validité du token obtenu:
+Verifier la validité d'un token (avec données de test)':
 Se rendre à l'endpoint http://localhost:3100/auth/checktoken
 {
     "id": "1",
     "token": "token456"
+}
+
+Vérifier la validité d'un token (si un utilisateur a été créé via la route register):
+Se rendre à l'endpoint http://localhost:3100/auth/checktoken
+{
+    "id": "2",
+    "token": "*token obtenu à la requete login*"
 }
 
 Obtenir le solde de l'utilisateur :
