@@ -17,7 +17,7 @@ describe('TokenService', () => {
   describe('checkToken', () => {
     it('should return true if repository returns true', async () => {
       clientRepo.checkToken.mockResolvedValue(true);
-      const result = await clientRepo.checkToken(1, 'abc123');
+      const result = await service.CheckToken(1, 'abc123');
       expect(result).toBe(true);
       expect(clientRepo.checkToken).toHaveBeenCalledWith(1, 'abc123');
     });
@@ -25,7 +25,7 @@ describe('TokenService', () => {
     it('should return false if repository returns false', async () => {
       clientRepo.checkToken.mockResolvedValue(false);
 
-      const result = await clientRepo.checkToken(1, 'wrongtoken');
+      const result = await service.CheckToken(1, 'wrongtoken');
       expect(result).toBe(false);
       expect(clientRepo.checkToken).toHaveBeenCalledWith(1, 'wrongtoken');
     });
@@ -33,8 +33,8 @@ describe('TokenService', () => {
     it('should throw if repository throws', async () => {
       clientRepo.checkToken.mockRejectedValue(new Error("DB error"));
 
-      await expect(clientRepo.checkToken(1, 'abc123'))
-        .rejects.toThrow("DB error");
+      await expect(service.CheckToken(1, 'abc123'))
+        .rejects.toThrow("Token not valid for client id 1");
     });
   });
 });
