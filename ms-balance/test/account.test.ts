@@ -23,7 +23,6 @@ describe('AccountService', () => {
       expect(balance).toBe(1234.56);
       expect(accountRepo.getBalance).toHaveBeenCalledWith(1);
     });
-    
     it('should throw an error if repository throws', async () => {
       accountRepo.getBalance.mockRejectedValue(new Error("DB error"));
 
