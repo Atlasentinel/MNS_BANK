@@ -123,3 +123,9 @@ Pour les microservices en C# comme ms-login, des tests unitaires sont effectués
 ```bash
 dotnet test
 ```
+
+## SWAGGER
+
+Pour le microservice <b>ms-login</b>, un swagger a été mit en place. Pour y acceder, il suffit de se rendre à l'adresse suivante : http://localhost:3001/swagger/index.html
+(N'oubliez pas de lancer le microservices au préalable pour y accéder).
+ 
