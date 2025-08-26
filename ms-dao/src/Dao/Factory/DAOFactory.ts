@@ -1,4 +1,4 @@
-import SQLDAOFactory from "./SQLDAOFactory";
+import SQLDAOFactory from "./SQLDaoFactory";
 import JsonDAOFactory from './JsonDAOFactory';
 import ClientDAO from '../ClientDAO';
 import AccountDAO from '../AccountDAO';

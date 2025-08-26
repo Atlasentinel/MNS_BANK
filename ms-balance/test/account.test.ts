@@ -1,37 +1,33 @@
-import AccountService from '../src/service/AccountService';
-
-jest.mock('axios');
-import axios from 'axios';
+import AccountService from '../src/domain/service/AccountService';
+import { AccountRepositoryPort } from '../src/port/out/AccountRepositoryPort';
+import { Account } from '../src/domain/model/Account';
 
 describe('AccountService', () => {
   let service: AccountService;
+  let accountRepo: jest.Mocked<AccountRepositoryPort>;
 
   beforeEach(() => {
-    service = new AccountService();
+    accountRepo = {
+      getBalance: jest.fn(),
+      // getAccountByClientId is intentionally omitted/commented
+    } as unknown as jest.Mocked<AccountRepositoryPort>;
+    service = new AccountService(accountRepo);
     jest.clearAllMocks();
   });
 
   describe('getBalance', () => {
-    it('should return the balance as a number when response is valid', async () => {
-      (axios.get as jest.Mock).mockResolvedValue({
-        data: { balance: "1234.56" }
-      });
+    it('should return the balance as a number when repository returns a value', async () => {
+      accountRepo.getBalance.mockResolvedValue(1234.56);
 
       const balance = await service.getBalance(1);
       expect(balance).toBe(1234.56);
-      expect(axios.get).toHaveBeenCalledWith('http://ms-dao:3200/client/1/account');
+      expect(accountRepo.getBalance).toHaveBeenCalledWith(1);
     });
+    
+    it('should throw an error if repository throws', async () => {
+      accountRepo.getBalance.mockRejectedValue(new Error("DB error"));
 
-    it('should throw an error if response has no data', async () => {
-      (axios.get as jest.Mock).mockResolvedValue({});
-
-      await expect(service.getBalance(1)).rejects.toThrow("No balance available");
-    });
-
-    it('should throw an error if response.data has no balance', async () => {
-      (axios.get as jest.Mock).mockResolvedValue({ data: {} });
-
-      await expect(service.getBalance(1)).rejects.toThrow("No balance available");
+      await expect(service.getBalance(1)).rejects.toThrow("Balance not found for client id 1");
     });
   });
 });

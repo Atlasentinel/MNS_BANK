@@ -22,26 +22,19 @@ export class SQLAccountDAO implements AccountDAO {
     }
 
     public async findById(id: number): Promise<Account> {
-        // Récupérer un compte associé à un client
-        let connexion = ConnexionSQL.getInstance();
-        let query = `SELECT * FROM accounts WHERE client_id = ${id}`;
-        return new Promise((resolve, reject) => {
-            connexion.getConnection().then(client => {
-                client.query(query).then(result => {
-                    if (result.rows.length > 0) {
-                        const row = result.rows[0];
-                        resolve(new Account(row.id, row.client_id, row.balance));
-                    } else {
-                        reject(new Error("Account not found"));
-                    }
-                }).catch(err => {
-                    reject(err);
-                }).finally(() => {
-                    client.release();
-                });
-            }).catch(err => {
-                reject(err);
-            });
-        });
+        const db = ConnexionSQL.getInstance();
+        const connexion = await db.getConnection();
+        try {
+            const result = await connexion.query(`SELECT * FROM accounts WHERE client_id = ${id}`);
+            if (result.rows.length === 0) {
+                throw new Error("Account not found");
+            }
+            const row = result.rows[0];
+            return new Account(row.id, row.client_id, row.balance);
+        } catch (error) {
+            throw error;
+        } finally {
+            connexion.release(); // c'est indispensable pour que mockRelease soit appelé
+        }
     }
 }
